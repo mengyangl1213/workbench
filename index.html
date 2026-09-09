@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>个人办公工作台</title>
+<style>
+/* ============ Reset & Base ============ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg-page);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+:root {
+  --primary: #0d9488;
+  --primary-light: #14b8a6;
+  --primary-dark: #0f766e;
+  --primary-bg: #f0fdfa;
+  --accent: #0891b2;
+  --accent-bg: #ecfeff;
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-page: #f0f4f8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --text: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --success: #22c55e;
+  --success-bg: #f0fdf4;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 25px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.05);
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
+a { color: var(--primary); text-decoration: none; }
+
+/* ============ Header Banner ============ */
+.header-banner {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.header-banner svg { display: block; width: 100%; height: auto; }
+
+/* ============ Layout ============ */
+.layout {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 0;
+  min-height: calc(100vh - 180px);
+}
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.content {
+  flex: 1;
+  padding: 20px 24px 40px;
+  min-width: 0;
+}
+
+/* ============ Sidebar Nav ============ */
+.nav-section { margin-bottom: 8px; }
+.nav-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 8px 12px 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all .15s ease;
+  text-align: left;
+}
+.nav-item:hover { background: var(--bg-soft); color: var(--text); }
+.nav-item.active { background: var(--primary-bg); color: var(--primary-dark); font-weight: 600; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+.sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-light); }
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: all .15s ease;
+}
+.sidebar-btn:hover { background: var(--bg-soft); color: var(--primary); }
+.sidebar-btn svg { width: 16px; height: 16px; }
+
+/* ============ Toolbar ============ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  transition: all .15s ease;
+}
+.toolbar-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.toolbar-btn svg { width: 14px; height: 14px; }
+
+/* ============ Alert Bar ============ */
+.alert-bar {
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.alert-bar.has-alerts { border-color: var(--danger-border); background: var(--danger-bg); }
+.alert-bar.no-alerts { border-color: var(--success); background: var(--success-bg); }
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.alert-bar.has-alerts .alert-title { color: var(--danger); }
+.alert-bar.no-alerts .alert-title { color: var(--success); }
+.alert-items { display: flex; flex-direction: column; gap: 6px; }
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  background: rgba(255,255,255,.6);
+  border-radius: var(--radius-sm);
+}
+.alert-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.alert-item .dot.red { background: var(--danger); }
+.alert-item .dot.orange { background: var(--warning); }
+.alert-item strong { color: var(--text); font-weight: 600; }
+.alert-item .alert-meta { color: var(--text-muted); font-size: 12px; }
+
+/* ============ Views ============ */
+.view { display: none; animation: fadeIn .2s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.section { margin-bottom: 28px; }
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title.danger { color: var(--danger); }
+.section-title.completed { color: var(--text-muted); font-weight: 600; }
+.section-title .count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ============ Todo Items ============ */
+.todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  transition: all .15s ease;
+}
+.todo-item:hover { box-shadow: var(--shadow); border-color: var(--primary-light); }
+.todo-item.overdue { border-color: var(--danger-border); background: var(--danger-bg); }
+.todo-item.done { opacity: .55; }
+.todo-item.done .todo-title { text-decoration: line-through; color: var(--text-muted); }
+.todo-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.todo-check input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+.todo-check .checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  transition: all .15s ease;
+}
+.todo-check input:checked + .checkmark {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.todo-check input:checked + .checkmark::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.todo-content { flex: 1; min-width: 0; }
+.todo-title { font-size: 14px; font-weight: 500; color: var(--text); word-break: break-word; white-space: pre-wrap; }
+.todo-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.tag.priority { border: 1px solid; }
+.tag.priority.urgent { color: #ef4444; background: #fef2f2; border-color: #fecaca; }
+.tag.priority.important { color: #d97706; background: #fffbeb; border-color: #fde68a; }
+.tag.priority.normal { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
+.tag.priority.low { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+.tag.project { color: var(--primary-dark); background: var(--primary-bg); }
+.tag.deadline { color: var(--text-muted); background: var(--bg-soft); }
+.tag.deadline.danger { color: var(--danger); background: var(--danger-bg); font-weight: 600; }
+.tag.postpone { color: var(--warning); background: var(--warning-bg); }
+.todo-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.btn-sm.btn-postpone { color: var(--warning); background: var(--warning-bg); border: 1px solid #fde68a; }
+.btn-sm.btn-postpone:hover { background: #fef3c7; }
+.btn-sm.btn-edit { color: var(--primary); background: var(--primary-bg); border: 1px solid #99f6e4; }
+.btn-sm.btn-edit:hover { background: #ccfbf1; }
+.btn-sm.btn-delete { color: var(--text-muted); background: var(--bg-soft); }
+.btn-sm.btn-delete:hover { color: var(--danger); background: var(--danger-bg); }
+
+/* ============ Add Form ============ */
+.add-form {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.add-form-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  transition: all .15s ease;
+}
+.add-form-toggle:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.add-form-toggle svg { width: 18px; height: 18px; }
+.add-form-body { display: none; }
+.add-form-body.show { display: block; }
+.form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.flex-1 { flex: 1; min-width: 180px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.form-input, .form-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color .15s ease;
+  outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,.1); }
+.form-textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; resize: vertical; min-height: 60px; outline: none; width: 100%; }
+.form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,.1); }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-primary {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .15s ease;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border-light); }
+
+/* ============ Empty State ============ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: .4; }
+
+/* ============ Date Group ============ */
+.date-group { margin-bottom: 16px; }
+.date-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+/* ============ Notes ============ */
+.notes-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition: all .15s ease;
+}
+.tag-chip:hover { border-color: var(--primary); color: var(--primary); }
+.tag-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+.note-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: all .15s ease;
+}
+.note-card:hover { box-shadow: var(--shadow); }
+.note-content { font-size: 14px; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.note-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; flex-wrap: wrap; }
+.note-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.note-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.note-tag:hover { background: var(--accent); color: white; }
+.note-time { font-size: 12px; color: var(--text-muted); }
+.note-delete { font-size: 12px; color: var(--text-muted); padding: 2px 6px; border-radius: 4px; }
+.note-delete:hover { color: var(--danger); }
+
+/* ============ Project Overview Bar ============ */
+.project-overview {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  margin-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.project-overview::-webkit-scrollbar { height: 4px; }
+.project-overview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.project-overview-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+.project-overview-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .15s ease;
+  cursor: pointer;
+}
+.project-overview-tag:hover {
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  background: var(--primary-bg);
+}
+.project-overview-tag .ovw-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.project-overview-tag .ovw-dot.done { background: var(--success); }
+.project-overview-tag .ovw-dot.blocked { background: var(--danger); }
+.project-overview-tag .ovw-dot.active { background: var(--primary); }
+.project-overview-tag .ovw-pct {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+.project-overview-tag:hover .ovw-pct { background: var(--primary); color: white; }
+.project-overview-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+/* ============ Projects ============ */
+.project-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  transition: all .15s ease;
+}
+.project-card:hover { box-shadow: var(--shadow-md); }
+.project-card.has-blocker { border-left: 3px solid var(--danger); }
+.project-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.project-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.project-actions { display: flex; gap: 4px; }
+.project-field { margin-bottom: 8px; }
+.project-field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 6px; }
+.project-field-value { font-size: 14px; color: var(--text); }
+.project-blocker {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--danger-bg);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--danger);
+  margin: 8px 0;
+}
+.project-blocker svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.project-progress {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; }
+.progress-label { color: var(--text-secondary); font-weight: 600; }
+.progress-count { color: var(--text-muted); }
+.progress-bar {
+  height: 8px;
+  background: var(--bg-soft);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  border-radius: 4px;
+  transition: width .3s ease;
+}
+.project-todos { margin-top: 10px; }
+.project-todo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 0;
+  color: var(--text-secondary);
+}
+.project-todo.done { text-decoration: line-through; color: var(--text-muted); }
+.project-todo .mini-check {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.project-todo.done .mini-check { background: var(--primary); border-color: var(--primary); }
+.project-todo.done .mini-check::after { content: '\2713'; color: white; font-size: 11px; font-weight: bold; }
+
+/* ============ Weekly Review ============ */
+.review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.review-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.review-card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; }
+.stat-big { font-size: 36px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.stat-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.chart-container { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.donut-legend { display: flex; flex-direction: column; gap: 6px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.energy-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.energy-bar-label { font-size: 13px; color: var(--text-secondary); width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.energy-bar-track { flex: 1; height: 22px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; position: relative; }
+.energy-bar-fill { height: 100%; border-radius: 6px; transition: width .4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 600; color: white; }
+.blocker-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--danger-bg);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.blocker-list-item strong { color: var(--danger); }
+.review-full-width { grid-column: 1 / -1; }
+
+/* ============ Modal ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; animation: fadeIn .15s ease; }
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal.modal-wide { max-width: 640px; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+/* ============ Export Reminder ============ */
+.export-reminder {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  max-width: 340px;
+  background: var(--bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  z-index: 90;
+}
+.export-reminder.show { display: block; animation: slideIn .3s ease; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.export-reminder-title { font-size: 14px; font-weight: 700; color: var(--warning); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.export-reminder-text { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+.export-reminder-actions { display: flex; gap: 8px; }
+
+/* ============ Toast ============ */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1e293b;
+  color: white;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all .3s ease;
+  z-index: 200;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============ Mobile Nav ============ */
+.mobile-nav { display: none; }
+
+/* ============ Responsive ============ */
+/* ============ Modal (Edit Dialogs) ============ */
+/* (modals use .modal-overlay / .modal defined above) */
+
+/* ============ Project Concept / Plan Blocks ============ */
+.field-block { margin-top: 10px; background: var(--bg-soft); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all .15s ease; }
+.field-block:hover { border-color: var(--primary-light); background: var(--primary-bg); }
+.field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.field-label svg { width: 12px; height: 12px; }
+.field-text { font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; line-height: 1.6; max-height: 120px; overflow: hidden; position: relative; }
+.field-text.empty { color: var(--text-muted); font-style: italic; }
+
+/* ============ Quick Add Todo (under project card) ============ */
+.quick-add-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  transition: all .15s ease;
+}
+.quick-add-toggle:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.quick-add-toggle svg { width: 15px; height: 15px; }
+.quick-add-body { margin-top: 10px; display: none; background: var(--bg-soft); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; }
+.quick-add-body.show { display: block; }
+.quick-add-body .form-input, .quick-add-body .form-select, .quick-add-body .form-textarea { font-size: 13px; padding: 7px 10px; }
+.quick-add-body .form-row { margin-bottom: 8px; }
+
+@media (max-width: 768px) {
+  .header-banner svg { height: 110px; }
+  .layout { flex-direction: column; }
+  .sidebar { display: none; }
+  .content { padding: 12px 14px 90px; }
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 6px 0;
+    z-index: 50;
+    box-shadow: 0 -2px 10px rgba(0,0,0,.04);
+  }
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: color .15s ease;
+  }
+  .mobile-nav-item.active { color: var(--primary); }
+  .mobile-nav-item svg { width: 22px; height: 22px; }
+  .mobile-nav-badge {
+    position: absolute;
+    top: 2px;
+    right: 50%;
+    transform: translateX(14px);
+    background: var(--danger);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 8px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+  }
+  .mobile-nav-item { position: relative; }
+  .todo-item { padding: 12px 10px; }
+  .todo-actions { flex-direction: column; gap: 4px; }
+  .btn-sm { min-height: 36px; min-width: 44px; padding: 6px 12px; }
+  .btn-primary, .btn-secondary { min-height: 44px; }
+  .form-input, .form-select, .form-textarea { min-height: 44px; }
+  .form-row { flex-direction: column; }
+  .form-group.flex-1 { min-width: 0; }
+  .review-grid { grid-template-columns: 1fr; }
+  .project-header { flex-direction: column; }
+  .toolbar { flex-wrap: wrap; }
+  .toolbar-btn { min-height: 40px; padding: 8px 14px; }
+  .export-reminder { bottom: 90px; right: 12px; left: 12px; max-width: none; }
+  .modal { padding: 18px; }
+  .chart-container { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Header Banner ============ -->
+<div class="header-banner">
+<svg viewBox="0 0 1200 170" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0fdfa"/>
+      <stop offset="40%" stop-color="#ecfeff"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </linearGradient>
+    <linearGradient id="hwave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.08"/>
+      <stop offset="50%" stop-color="#0891b2" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#0d9488" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="170" fill="url(#hbg)"/>
+  <!-- decorative circles -->
+  <circle cx="980" cy="35" r="75" fill="#0d9488" opacity="0.04"/>
+  <circle cx="1070" cy="80" r="45" fill="#0891b2" opacity="0.05"/>
+  <circle cx="910" cy="100" r="25" fill="#14b8a6" opacity="0.06"/>
+  <circle cx="1120" cy="40" r="15" fill="#06b6d4" opacity="0.08"/>
+  <!-- thin lines -->
+  <line x1="860" y1="20" x2="860" y2="150" stroke="#0d9488" stroke-width="1" opacity="0.06"/>
+  <line x1="900" y1="20" x2="900" y2="150" stroke="#0891b2" stroke-width="1" opacity="0.05"/>
+  <!-- wave -->
+  <path d="M0,130 Q200,110 400,130 T800,130 T1200,130 L1200,170 L0,170 Z" fill="url(#hwave)"/>
+  <path d="M0,145 Q200,128 400,145 T800,145 T1200,145 L1200,170 L0,170 Z" fill="#0d9488" opacity="0.04"/>
+  <!-- title -->
+  <text x="48" y="75" font-family="system-ui,sans-serif" font-size="26" font-weight="700" fill="#0f766e">个人办公工作台</text>
+  <text x="48" y="100" font-family="system-ui,sans-serif" font-size="13" fill="#64748b">待办管理 · 灵感速记 · 项目跟进 · 每周复盘</text>
+  <text x="48" y="118" font-family="system-ui,sans-serif" font-size="11" fill="#94a3b8">让每一天的工作都有迹可循</text>
+</svg>
+</div>
+
+<!-- ============ Layout ============ -->
+<div class="layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">工作台</div>
+      <button class="nav-item active" data-nav="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        今日待办
+        <span class="nav-badge" id="navBadgeToday" style="display:none"></span>
+      </button>
+      <button class="nav-item" data-nav="notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+        灵感速记
+      </button>
+      <button class="nav-item" data-nav="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        项目跟进
+      </button>
+      <button class="nav-item" data-nav="review">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+        每周复盘
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" data-action="export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        导出备份
+      </button>
+      <button class="sidebar-btn" data-action="import-trigger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        导入数据
+      </button>
+      <button class="sidebar-btn" data-action="clear-samples" id="btnClearSamples">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        清空示例
+      </button>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content">
+    <!-- Toolbar (export/import for mobile) -->
+    <div class="toolbar">
+      <span id="syncIndicator" style="display:none;font-size:12px;color:var(--text-muted);align-items:center;gap:5px;margin-right:auto;cursor:pointer" title="点击查看详情">
+        <span class="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#94a3b8"></span>
+        <span class="sync-label">离线</span>
+        <span class="sync-detail" style="display:none;margin-left:2px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      </span>
+      <button class="toolbar-btn" id="btnForceSync" data-action="force-sync" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        同步
+      </button>
+      <button class="toolbar-btn" id="btnSyncLink" data-action="sync-link" style="display:none" title="生成同步链接，分享给其他设备">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        链接同步
+      </button>
+      <button class="toolbar-btn" data-action="export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        导出
+      </button>
+      <button class="toolbar-btn" data-action="import-trigger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        导入
+      </button>
+      <button class="toolbar-btn" data-action="clear-samples" id="btnClearSamplesTop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        清空示例
+      </button>
+    </div>
+
+    <!-- Alert Bar -->
+    <div class="alert-bar" id="alertBar"></div>
+
+    <!-- View: Today -->
+    <div class="view active" id="view-today">
+      <button class="add-form-toggle" id="toggleTodoForm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        新建待办
+      </button>
+      <div class="add-form">
+        <div class="add-form-body" id="todoFormBody">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>任务标题</label>
+              <textarea class="form-textarea" id="todoTitle" placeholder="今天要做什么？（可换行）" rows="2" style="min-height:52px"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>轻重缓急</label>
+              <select class="form-select" id="todoPriority">
+                <option value="urgent">紧急</option>
+                <option value="important" selected>重要</option>
+                <option value="normal">一般</option>
+                <option value="low">不急</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>截止日期</label>
+              <input type="date" class="form-input" id="todoDeadline">
+            </div>
+            <div class="form-group">
+              <label>关联项目（可选）</label>
+              <select class="form-select" id="todoProject">
+                <option value="">无</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" id="btnCancelTodo">取消</button>
+            <button class="btn-primary" id="btnAddTodo">添加</button>
+          </div>
+        </div>
+      </div>
+      <div id="todoList"></div>
+    </div>
+
+    <!-- View: Notes -->
+    <div class="view" id="view-notes">
+      <button class="add-form-toggle" id="toggleNoteForm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        记一条灵感
+      </button>
+      <div class="add-form">
+        <div class="add-form-body" id="noteFormBody">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>内容</label>
+              <textarea class="form-textarea" id="noteContent" placeholder="想到了什么？随手记下来…" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>标签（逗号分隔）</label>
+              <input class="form-input" id="noteTags" placeholder="期货, 策略, 学习">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" id="btnCancelNote">取消</button>
+            <button class="btn-primary" id="btnAddNote">保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="notes-toolbar" id="noteTagFilters"></div>
+      <div id="notesList"></div>
+    </div>
+
+    <!-- View: Projects -->
+    <div class="view" id="view-projects">
+      <div id="projectOverview" class="project-overview"></div>
+      <button class="add-form-toggle" id="toggleProjectForm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        新建项目
+      </button>
+      <div class="add-form">
+        <div class="add-form-body" id="projectFormBody">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>项目名称</label>
+              <input class="form-input" id="projectName" placeholder="项目名称">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>当前进度（现在到哪一步）</label>
+              <input class="form-input" id="projectCurrent" placeholder="正在进行…">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>下一步（做什么）</label>
+              <input class="form-input" id="projectNext" placeholder="接下来…">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>卡点（卡在哪儿）</label>
+              <input class="form-input" id="projectBlocker" placeholder="如果有卡住的地方写这里…">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" id="btnCancelProject">取消</button>
+            <button class="btn-primary" id="btnAddProject">添加</button>
+          </div>
+        </div>
+      </div>
+      <div id="projectsList"></div>
+    </div>
+
+    <!-- View: Review -->
+    <div class="view" id="view-review">
+      <div id="reviewContent"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ Mobile Bottom Nav ============ -->
+<nav class="mobile-nav">
+  <button class="mobile-nav-item active" data-nav="today">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    待办
+    <span class="mobile-nav-badge" id="mobileBadgeToday" style="display:none"></span>
+  </button>
+  <button class="mobile-nav-item" data-nav="notes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+    速记
+  </button>
+  <button class="mobile-nav-item" data-nav="projects">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    项目
+  </button>
+  <button class="mobile-nav-item" data-nav="review">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+    复盘
+  </button>
+</nav>
+
+<!-- ============ Project Edit Modal ============ -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-title" id="projectModalTitle">编辑项目</div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>项目名称</label>
+        <input class="form-input" id="editProjectName">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>当前进度</label>
+        <input class="form-input" id="editProjectCurrent">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>下一步</label>
+        <input class="form-input" id="editProjectNext">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>项目构思</label>
+        <textarea class="form-textarea" id="editProjectConcept" rows="3" placeholder="为什么做、目标、预期成果……"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>整体规划</label>
+        <textarea class="form-textarea" id="editProjectPlan" rows="5" placeholder="分阶段计划、里程碑、时间安排……"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>卡点</label>
+        <input class="form-input" id="editProjectBlocker" placeholder="没有卡点可留空">
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn-secondary" id="btnCloseProjectModal">取消</button>
+      <button class="btn-primary" id="btnSaveProjectModal">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Export Reminder ============ -->
+<div class="export-reminder" id="exportReminder">
+  <div class="export-reminder-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    记得导出备份
+  </div>
+  <div class="export-reminder-text">你已积累 <strong id="reminderCount">0</strong> 条数据，建议导出一份备份，防止浏览器清理后丢失。</div>
+  <div class="export-reminder-actions">
+    <button class="btn-primary" id="btnReminderExport" style="padding:6px 16px;font-size:13px">立即导出</button>
+    <button class="btn-secondary" id="btnReminderDismiss" style="padding:6px 16px;font-size:13px">知道了</button>
+  </div>
+</div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="importFile" accept=".json" style="display:none">
+
+<!-- 待办编辑弹窗 -->
+<div class="modal-overlay" id="todoEditModal">
+  <div class="modal">
+    <div class="modal-title">编辑待办</div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>待办事项（支持换行）</label>
+        <textarea class="form-textarea" id="todoEditTitle" placeholder="要做什么？"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>轻重缓急</label>
+        <select class="form-select" id="todoEditPriority">
+          <option value="urgent">紧急</option>
+          <option value="important">重要</option>
+          <option value="normal">一般</option>
+          <option value="low">不急</option>
+        </select>
+      </div>
+      <div class="form-group flex-1">
+        <label>截止日期</label>
+        <input type="date" class="form-input" id="todoEditDeadline">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>关联项目（可选）</label>
+        <select class="form-select" id="todoEditProject">
+          <option value="">无</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn-secondary" id="todoEditCancel">取消</button>
+      <button class="btn-primary" id="todoEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ============ State ============
+var state = { todos: [], notes: [], projects: [], exportReminderDismissed: false };
+var currentView = 'today';
+var noteTagFilter = null;
+var editingProjectId = null;
+var editingTodoId = null;
+
+var STORAGE_KEY = 'workspace_state_v1';
+
+var PRIORITIES = {
+  urgent:    { label: '紧急', color: '#ef4444', bg: '#fef2f2', border: '#fecaca', barColor: '#ef4444' },
+  important: { label: '重要', color: '#d97706', bg: '#fffbeb', border: '#fde68a', barColor: '#f59e0b' },
+  normal:    { label: '一般', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', barColor: '#3b82f6' },
+  low:       { label: '不急', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', barColor: '#94a3b8' }
+};
+
+var PRIORITY_ORDER = { urgent: 0, important: 1, normal: 2, low: 3 };
+
+// ============ GitHub Gist 云同步配置 ============
+// Token 从 localStorage 读取，首次打开时提示输入（避免明文硬编码泄露）
+var GH_TOKEN  = localStorage.getItem('gh_sync_token') || '';
+var GH_API    = 'https://api.github.com';
+var GH_GIST_ID = '93727bf9e57a207443d4df5435d29093';  // 所有设备共用同一个 Gist
+var GH_ENABLED = false;
+var SYNC_TIMEOUT = 12000;
+var _lastCloudTimestamp = 0;
+var _syncPending = false;
+var _syncStatus = 'offline';
+var _syncError = '';
+var _pollTimer = null;
+var _retryCount = 0;
+var _maxRetries = 3;
+var _retryTimer = null;
+
+function initGitHubSync() {
+  if (!GH_TOKEN || GH_TOKEN.indexOf('ghp_') !== 0) {
+    GH_TOKEN = prompt('请输入 GitHub Personal Access Token（只勾 gist 权限）以启用云同步：\n\n（此 Token 仅存储在浏览器本地，不会上传到任何服务器）') || '';
+    if (GH_TOKEN) {
+      localStorage.setItem('gh_sync_token', GH_TOKEN);
+    }
+  }
+  if (!GH_TOKEN) return false;
+  GH_ENABLED = true;
+  return true;
+}
+
+function fetchSync(url, options) {
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, SYNC_TIMEOUT);
+  var opts = options || {};
+  opts.signal = ctrl.signal;
+  return fetch(url, opts).then(function(r) {
+    clearTimeout(t);
+    return r;
+  }).catch(function(e) {
+    clearTimeout(t);
+    throw e;
+  });
+}
+
+function pushToCloud() {
+  if (!GH_ENABLED || _syncPending) return;
+  _syncPending = true;
+  _syncStatus = 'syncing';
+  updateSyncIndicator();
+
+  var payload = JSON.stringify({
+    todos: state.todos,
+    notes: state.notes,
+    projects: state.projects,
+    exportReminderDismissed: state.exportReminderDismissed,
+    _ts: Date.now()
+  });
+
+  fetchSync(GH_API + '/gists/' + GH_GIST_ID, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'token ' + GH_TOKEN,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      files: { 'dashboard-state.json': { content: payload } }
+    })
+  }).then(function(r) { return r.json(); })
+    .then(function() {
+      _lastCloudTimestamp = Date.now();
+      _syncStatus = 'online';
+      _retryCount = 0;
+      updateSyncIndicator();
+      _syncPending = false;
+    }).catch(function(err) {
+      console.warn('[Sync] 推送失败:', err && err.name);
+      _syncPending = false;
+      if (err && err.name === 'AbortError') setSyncError('推送超时');
+      scheduleRetry();
+    });
+}
+
+function scheduleRetry() {
+  if (_retryCount >= _maxRetries) {
+    _syncStatus = 'offline';
+    setSyncError('重试3次均失败');
+    updateSyncIndicator();
+    console.warn('[Sync] 已重试 ' + _maxRetries + ' 次，放弃');
+    return;
+  }
+  _retryCount++;
+  var d = 2000 * _retryCount;
+  _syncStatus = 'syncing';
+  updateSyncIndicator();
+  if (_retryTimer) clearTimeout(_retryTimer);
+  _retryTimer = setTimeout(pushToCloud, d);
+}
+
+function pullFromCloud() {
+  if (!GH_ENABLED) return;
+  fetchSync(GH_API + '/gists/' + GH_GIST_ID, {
+    headers: {
+      'Authorization': 'token ' + GH_TOKEN,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  }).then(function(r) { return r.json(); })
+    .then(function(gist) {
+      var file = gist.files && gist.files['dashboard-state.json'];
+      if (!file || !file.content) return;
+      try {
+        var cloud = JSON.parse(file.content);
+        var cloudTs = cloud._ts || 0;
+        if (cloudTs > _lastCloudTimestamp && cloud.todos) {
+          state = {
+            todos: cloud.todos || [],
+            notes: cloud.notes || [],
+            projects: cloud.projects || [],
+            exportReminderDismissed: cloud.exportReminderDismissed || false
+          };
+          ensureProjectFields();
+          _lastCloudTimestamp = cloudTs;
+          saveToLocalStorage();
+          render();
+          updateTodoProjectOptions();
+          _syncStatus = 'online';
+          _retryCount = 0;
+          updateSyncIndicator();
+          console.log('[Sync] 已从云端更新');
+        } else if (!_syncPending) {
+          _syncStatus = 'online';
+          updateSyncIndicator();
+        }
+      } catch(e) { console.warn('[Sync] 解析失败:', e); }
+    }).catch(function(err) {
+      console.warn('[Sync] 拉取失败:', err && err.name);
+      if (err && err.name === 'AbortError') {
+        setSyncError('连接超时 (api.github.com 不可达)');
+      } else if (err && err.message) {
+        setSyncError(err.message.substring(0, 40));
+      }
+    });
+}
+
+function forceSync() {
+  if (!GH_ENABLED) return;
+  _retryCount = 0;
+  if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
+  _syncPending = false;
+  _syncStatus = 'syncing';
+  updateSyncIndicator();
+  pushToCloud();
+  pullFromCloud();
+  toast('正在同步...');
+}
+
+// ============ Sync Link (fallback for devices that can't reach GitHub) ============
+function generateSyncLink() {
+  var payload = JSON.stringify({
+    todos: state.todos,
+    notes: state.notes,
+    projects: state.projects,
+    exportReminderDismissed: state.exportReminderDismissed,
+    _ts: Date.now()
+  });
+  // Compress: JSON → encodeURIComponent → base64 (avoid btoa Unicode issues)
+  var compressed = btoa(unescape(encodeURIComponent(payload)));
+  // Build link with hash
+  var base = window.location.href.replace(/#.*$/, '');
+  var link = base + '#sync=' + compressed;
+  
+  // Try to copy to clipboard
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function() {
+      toast('同步链接已复制到剪贴板！发送给其他设备即可同步');
+    }).catch(function() {
+      promptSyncLink(link);
+    });
+  } else {
+    promptSyncLink(link);
+  }
+}
+
+function promptSyncLink(link) {
+  // Fallback: show a prompt the user can copy from
+  var ok = confirm('同步链接已生成。\n\n请复制以下链接发送到其他设备：\n\n' + link.substring(0, 200) + '...\n\n（点击确定后可在地址栏复制完整链接）');
+  if (ok) {
+    // Set the URL hash so it appears in the address bar
+    window.location.hash = 'sync=' + link.split('#sync=')[1];
+    var temp = document.createElement('textarea');
+    temp.value = window.location.href;
+    document.body.appendChild(temp);
+    temp.select();
+    try { document.execCommand('copy'); toast('链接已复制到剪贴板！'); } catch(e) {}
+    document.body.removeChild(temp);
+  }
+}
+
+function checkSyncHash() {
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('#sync=') !== 0) return false;
+  var compressed = hash.substring(6); // Remove '#sync='
+  try {
+    var payload = decodeURIComponent(escape(atob(compressed)));
+    var cloud = JSON.parse(payload);
+    if (cloud.todos && cloud.notes && cloud.projects) {
+      var cloudTs = cloud._ts || 0;
+      if (cloudTs > _lastCloudTimestamp) {
+        state = {
+          todos: cloud.todos || [],
+          notes: cloud.notes || [],
+          projects: cloud.projects || [],
+          exportReminderDismissed: cloud.exportReminderDismissed || false
+        };
+        ensureProjectFields();
+        _lastCloudTimestamp = cloudTs;
+        saveToLocalStorage();
+        autoMoveOverdue();
+        render();
+        updateTodoProjectOptions();
+        // Clean up the hash
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        toast('已从同步链接导入数据！');
+        // Push to cloud if available
+        if (GH_ENABLED) pushToCloud();
+        return true;
+      }
+    }
+  } catch(e) {
+    console.warn('[Sync] 链接解析失败:', e);
+  }
+  return false;
+}
+function startPolling() {
+  if (!GH_ENABLED) return;
+  if (_pollTimer) clearInterval(_pollTimer);
+  _pollTimer = setInterval(pullFromCloud, 8000);
+}
+
+function updateSyncIndicator() {
+  var el = document.getElementById('syncIndicator');
+  if (!el) return;
+  var btn = document.getElementById('btnForceSync');
+  var btnLink = document.getElementById('btnSyncLink');
+  var detail = el.querySelector('.sync-detail');
+  if (!GH_ENABLED) {
+    el.style.display = 'none';
+    if (btn) btn.style.display = 'none';
+    if (btnLink) btnLink.style.display = 'none';
+    return;
+  }
+  el.style.display = 'inline-flex';
+  if (btn) btn.style.display = '';
+  if (btnLink) btnLink.style.display = '';
+  var dot = el.querySelector('.sync-dot');
+  var label = el.querySelector('.sync-label');
+  if (_syncStatus === 'online') {
+    dot.style.background = '#22c55e';
+    label.textContent = '已同步';
+    if (detail) detail.style.display = 'none';
+    if (btn) btn.style.opacity = '0.6';
+  } else if (_syncStatus === 'syncing') {
+    dot.style.background = '#f59e0b';
+    label.textContent = '同步中';
+    if (detail) detail.style.display = 'none';
+    if (btn) btn.style.opacity = '1';
+  } else {
+    dot.style.background = '#ef4444';
+    label.textContent = '离线';
+    if (detail) {
+      detail.textContent = _syncError ? '— ' + _syncError : '';
+      detail.style.display = _syncError ? 'inline' : 'none';
+    }
+    if (btn) btn.style.opacity = '1';
+  }
+}
+
+function setSyncError(msg) {
+  _syncError = msg;
+  if (_syncStatus === 'offline') updateSyncIndicator();
+}
+
+function saveToLocalStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    toast('保存失败：存储空间不足');
+  }
+}
+
+// ============ Utilities ============
+function uuid() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 7);
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function dateStr(d) {
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+function todayStr() { return dateStr(new Date()); }
+
+function dateOffset(days) {
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  return dateStr(d);
+}
+
+function formatDateDisplay(s) {
+  if (!s) return '';
+  var parts = s.split('-');
+  return parts[1] + '月' + parts[2] + '日';
+}
+
+function formatDateFull(s) {
+  if (!s) return '';
+  var d = new Date(s + 'T00:00:00');
+  var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  var today = todayStr();
+  var tomorrow = dateOffset(1);
+  var yesterday = dateOffset(-1);
+  if (s === today) return '今天';
+  if (s === tomorrow) return '明天';
+  if (s === yesterday) return '昨天';
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日 周' + weekdays[d.getDay()];
+}
+
+function daysFromToday(s) {
+  var today = new Date(todayStr() + 'T00:00:00');
+  var target = new Date(s + 'T00:00:00');
+  return Math.round((target - today) / 86400000);
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins = Math.floor(diff / 60000);
+  if (mins < 1) return '刚刚';
+  if (mins < 60) return mins + '分钟前';
+  var hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + '小时前';
+  var days = Math.floor(hours / 24);
+  if (days < 7) return days + '天前';
+  return formatDateDisplay(dateStr(new Date(iso)));
+}
+
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.classList.add('show'); }, 10);
+  setTimeout(function() {
+    t.classList.remove('show');
+    setTimeout(function() { t.remove(); }, 300);
+  }, 1800);
+}
+
+// ============ State Management ============
+// 兼容旧数据：为项目补 concept/plan 默认字段
+function ensureProjectFields() {
+  state.projects.forEach(function(p) {
+    if (typeof p.concept === 'undefined') p.concept = '';
+    if (typeof p.plan === 'undefined') p.plan = '';
+  });
+}
+
+function loadState() {
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = JSON.parse(saved);
+      if (!state.todos) state.todos = [];
+      if (!state.notes) state.notes = [];
+      if (!state.projects) state.projects = [];
+      if (state.exportReminderDismissed === undefined) state.exportReminderDismissed = false;
+      _lastCloudTimestamp = state._localTs || 0;
+      ensureProjectFields();
+    } else {
+      state = getSampleData();
+      saveToLocalStorage();
+    }
+  } catch(e) {
+    console.error('Load error:', e);
+    state = getSampleData();
+  }
+}
+
+function saveState() {
+  state._localTs = Date.now();
+  saveToLocalStorage();
+  // 延迟推送云端（去抖，避免频繁写）
+  if (GH_ENABLED && !_syncPending) {
+    clearTimeout(saveState._debounce);
+    saveState._debounce = setTimeout(pushToCloud, 800);
+  }
+}
+
+function autoMoveOverdue() {
+  var today = todayStr();
+  var changed = false;
+  state.todos.forEach(function(t) {
+    if (!t.done && t.deadline < today) {
+      t.deadline = today;
+      t.postponedCount = (t.postponedCount || 0) + 1;
+      changed = true;
+    }
+  });
+  if (changed) saveState();
+}
+
+// ============ Sample Data ============
+function getSampleData() {
+  var p1 = uuid(), p2 = uuid(), p3 = uuid();
+  return {
+    todos: [
+      { id: uuid(), title: '完成二永债发行统计周报', priority: 'urgent', deadline: todayStr(), done: false, createdAt: new Date().toISOString(), postponedCount: 0, projectId: p1, isSample: true },
+      { id: uuid(), title: '更新IRS数据提取脚本', priority: 'important', deadline: todayStr(), done: false, createdAt: new Date().toISOString(), postponedCount: 0, projectId: p2, isSample: true },
+      { id: uuid(), title: '复盘国开与二永债利差走势', priority: 'urgent', deadline: dateOffset(-1), done: false, createdAt: new Date(Date.now()-86400000).toISOString(), postponedCount: 0, projectId: p1, isSample: true },
+      { id: uuid(), title: '整理汇率知识笔记', priority: 'normal', deadline: dateOffset(1), done: false, createdAt: new Date().toISOString(), postponedCount: 0, isSample: true },
+      { id: uuid(), title: '下载TTRD_CMDS_BESO_STATISTICS表6月数据', priority: 'important', deadline: dateOffset(2), done: false, createdAt: new Date().toISOString(), postponedCount: 0, isSample: true },
+      { id: uuid(), title: '期货跨期策略周报', priority: 'important', deadline: dateOffset(-2), done: true, completedAt: new Date(Date.now()-2*86400000).toISOString(), createdAt: new Date(Date.now()-3*86400000).toISOString(), postponedCount: 0, projectId: p3, isSample: true },
+      { id: uuid(), title: 'IRS走势图分位线对称显示调整', priority: 'normal', deadline: dateOffset(-1), done: true, completedAt: new Date(Date.now()-1*86400000).toISOString(), createdAt: new Date(Date.now()-2*86400000).toISOString(), postponedCount: 0, projectId: p2, isSample: true },
+      { id: uuid(), title: '5y/7y活跃券偏离分析', priority: 'normal', deadline: dateOffset(-3), done: true, completedAt: new Date(Date.now()-3*86400000).toISOString(), createdAt: new Date(Date.now()-4*86400000).toISOString(), postponedCount: 0, isSample: true }
+    ],
+    notes: [
+      { id: uuid(), content: '期货跨期策略：关注活跃券基差收窄信号，考虑空近月多远月，需结合资金面变化确认。', tags: ['期货', '策略'], createdAt: new Date(Date.now()-3600000).toISOString(), isSample: true },
+      { id: uuid(), content: '30-10曲线走平可能反映降息预期升温，需结合资金面和通胀数据验证。如果持续走平可以考虑曲线策略。', tags: ['曲线', '基本面'], createdAt: new Date(Date.now()-7200000).toISOString(), isSample: true },
+      { id: uuid(), content: '理财估值整改对二永债估值影响需持续跟踪，关注抛压变化和估值方法切换的时间节点。', tags: ['二永债', '政策'], createdAt: new Date(Date.now()-86400000).toISOString(), isSample: true },
+      { id: uuid(), content: '吞没形态进阶规则：半吞没和干扰K线处理规则需复习，注意区分有效吞没和假信号。', tags: ['交易', '学习'], createdAt: new Date(Date.now()-2*86400000).toISOString(), isSample: true }
+    ],
+    projects: [
+      { id: p1, name: '二永债深度研究', currentStep: '发行统计与利差走势复盘', nextStep: '梳理理财估值整改对二永债的影响', blocker: '部分发行数据源待确认', createdAt: new Date(Date.now()-7*86400000).toISOString(), isSample: true },
+      { id: p2, name: 'IRS自动化流水线优化', currentStep: '分位线对称显示调整', nextStep: '验证多品种图表效果', blocker: '', createdAt: new Date(Date.now()-5*86400000).toISOString(), isSample: true },
+      { id: p3, name: '债券定价量化模型', currentStep: '久期与票息收益率计算', nextStep: '基点bp计算模块', blocker: '中债估值数据格式不统一', createdAt: new Date(Date.now()-10*86400000).toISOString(), isSample: true }
+    ],
+    exportReminderDismissed: false
+  };
+}
+
+// ============ Todo Operations ============
+function addTodo() {
+  var title = document.getElementById('todoTitle').value.trim();
+  if (!title) { toast('请填写任务标题'); return; }
+  var priority = document.getElementById('todoPriority').value;
+  var deadline = document.getElementById('todoDeadline').value || todayStr();
+  var projectId = document.getElementById('todoProject').value || null;
+  state.todos.push({
+    id: uuid(), title: title, priority: priority, deadline: deadline,
+    done: false, createdAt: new Date().toISOString(), postponedCount: 0, projectId: projectId
+  });
+  saveState();
+  document.getElementById('todoTitle').value = '';
+  document.getElementById('todoFormBody').classList.remove('show');
+  render();
+  toast('已添加待办');
+}
+
+function toggleTodo(id) {
+  var t = findTodo(id);
+  if (!t) return;
+  t.done = !t.done;
+  t.completedAt = t.done ? new Date().toISOString() : null;
+  saveState();
+  render();
+}
+
+function postponeTodo(id) {
+  var t = findTodo(id);
+  if (!t) return;
+  t.deadline = dateOffset(1);
+  t.postponedCount = (t.postponedCount || 0) + 1;
+  saveState();
+  render();
+  toast('已顺延到明天');
+}
+
+function deleteTodo(id) {
+  state.todos = state.todos.filter(function(t) { return t.id !== id; });
+  saveState();
+  render();
+  toast('已删除');
+}
+
+function findTodo(id) {
+  for (var i = 0; i < state.todos.length; i++) {
+    if (state.todos[i].id === id) return state.todos[i];
+  }
+  return null;
+}
+
+// ============ Todo Edit Modal ============
+function openEditTodo(id) {
+  var t = findTodo(id);
+  if (!t) return;
+  editingTodoId = id;
+  document.getElementById('todoEditTitle').value = t.title;
+  document.getElementById('todoEditPriority').value = t.priority || 'normal';
+  document.getElementById('todoEditDeadline').value = t.deadline || todayStr();
+  updateTodoEditProjectOptions();
+  document.getElementById('todoEditProject').value = t.projectId || '';
+  document.getElementById('todoEditModal').classList.add('show');
+  setTimeout(function() { document.getElementById('todoEditTitle').focus(); }, 50);
+}
+
+function saveTodoEdit() {
+  var t = findTodo(editingTodoId);
+  if (!t) { closeTodoEdit(); return; }
+  var title = document.getElementById('todoEditTitle').value.trim();
+  if (!title) { toast('标题不能为空'); return; }
+  t.title = title;
+  t.priority = document.getElementById('todoEditPriority').value;
+  t.deadline = document.getElementById('todoEditDeadline').value || todayStr();
+  t.projectId = document.getElementById('todoEditProject').value || null;
+  saveState();
+  closeTodoEdit();
+  render();
+  toast('已保存');
+}
+
+function closeTodoEdit() {
+  document.getElementById('todoEditModal').classList.remove('show');
+  editingTodoId = null;
+}
+
+function updateTodoEditProjectOptions() {
+  var sel = document.getElementById('todoEditProject');
+  sel.innerHTML = '<option value="">无</option>';
+  state.projects.forEach(function(p) {
+    sel.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>';
+  });
+}
+
+// ============ Note Operations ============
+function addNote() {
+  var content = document.getElementById('noteContent').value.trim();
+  if (!content) { toast('请填写内容'); return; }
+  var tagsStr = document.getElementById('noteTags').value.trim();
+  var tags = tagsStr ? tagsStr.split(/[,，、\s]+/).filter(Boolean).map(function(s) { return s.trim(); }) : [];
+  state.notes.push({
+    id: uuid(), content: content, tags: tags, createdAt: new Date().toISOString()
+  });
+  saveState();
+  document.getElementById('noteContent').value = '';
+  document.getElementById('noteTags').value = '';
+  document.getElementById('noteFormBody').classList.remove('show');
+  render();
+  toast('已保存');
+}
+
+function deleteNote(id) {
+  state.notes = state.notes.filter(function(n) { return n.id !== id; });
+  saveState();
+  render();
+  toast('已删除');
+}
+
+// ============ Project Operations ============
+function addProject() {
+  var name = document.getElementById('projectName').value.trim();
+  if (!name) { toast('请填写项目名称'); return; }
+  var current = document.getElementById('projectCurrent').value.trim();
+  var next = document.getElementById('projectNext').value.trim();
+  var blocker = document.getElementById('projectBlocker').value.trim();
+  state.projects.push({
+    id: uuid(), name: name, currentStep: current, nextStep: next, blocker: blocker,
+    concept: '', plan: '',
+    createdAt: new Date().toISOString()
+  });
+  saveState();
+  ['projectName','projectCurrent','projectNext','projectBlocker'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('projectFormBody').classList.remove('show');
+  render();
+  toast('已添加项目');
+}
+
+function openEditProject(id) {
+  var p = state.projects.find(function(x) { return x.id === id; });
+  if (!p) return;
+  editingProjectId = id;
+  document.getElementById('editProjectName').value = p.name;
+  document.getElementById('editProjectCurrent').value = p.currentStep || '';
+  document.getElementById('editProjectNext').value = p.nextStep || '';
+  document.getElementById('editProjectConcept').value = p.concept || '';
+  document.getElementById('editProjectPlan').value = p.plan || '';
+  document.getElementById('editProjectBlocker').value = p.blocker || '';
+  document.getElementById('projectModal').classList.add('show');
+}
+
+function saveProjectModal() {
+  var p = state.projects.find(function(x) { return x.id === editingProjectId; });
+  if (!p) return;
+  p.name = document.getElementById('editProjectName').value.trim() || p.name;
+  p.currentStep = document.getElementById('editProjectCurrent').value.trim();
+  p.nextStep = document.getElementById('editProjectNext').value.trim();
+  p.concept = document.getElementById('editProjectConcept').value.trim();
+  p.plan = document.getElementById('editProjectPlan').value.trim();
+  p.blocker = document.getElementById('editProjectBlocker').value.trim();
+  saveState();
+  document.getElementById('projectModal').classList.remove('show');
+  editingProjectId = null;
+  render();
+  toast('已保存');
+}
+
+function deleteProject(id) {
+  state.projects = state.projects.filter(function(p) { return p.id !== id; });
+  state.todos.forEach(function(t) { if (t.projectId === id) t.projectId = null; });
+  saveState();
+  render();
+  toast('已删除项目');
+}
+
+// ============ Quick Add Todo (project card) ============
+function toggleQuickAdd(projectId) {
+  var body = document.getElementById('quickAdd-' + projectId);
+  if (!body) return;
+  var willShow = !body.classList.contains('show');
+  // close others
+  document.querySelectorAll('.quick-add-body.show').forEach(function(el) { el.classList.remove('show'); });
+  if (willShow) {
+    body.classList.add('show');
+    var dl = document.getElementById('qa-deadline-' + projectId);
+    if (dl && !dl.value) dl.value = todayStr();
+    var inp = document.getElementById('qa-title-' + projectId);
+    if (inp) setTimeout(function() { inp.focus(); }, 50);
+  }
+}
+
+function quickAddTodo(projectId) {
+  var titleEl = document.getElementById('qa-title-' + projectId);
+  var priEl = document.getElementById('qa-priority-' + projectId);
+  var dlEl = document.getElementById('qa-deadline-' + projectId);
+  var title = (titleEl.value || '').trim();
+  if (!title) { toast('请填写任务标题'); return; }
+  state.todos.push({
+    id: uuid(), title: title, priority: priEl.value || 'normal',
+    deadline: dlEl.value || todayStr(),
+    done: false, createdAt: new Date().toISOString(), postponedCount: 0,
+    projectId: projectId
+  });
+  saveState();
+  render();
+  // 保持该项目的快捷输入框展开，方便连续添加
+  var body = document.getElementById('quickAdd-' + projectId);
+  if (body) {
+    body.classList.add('show');
+    var dl = document.getElementById('qa-deadline-' + projectId);
+    if (dl) dl.value = todayStr();
+    var inp = document.getElementById('qa-title-' + projectId);
+    if (inp) inp.focus();
+  }
+  toast('已添加到「' + (state.projects.find(function(p){return p.id===projectId;})||{name:''}).name + '」');
+}
+
+// ============ Export/Import ============
+function exportData() {
+  var data = JSON.stringify(state, null, 2);
+  var blob = new Blob([data], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '工作台备份_' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  state.exportReminderDismissed = true;
+  saveState();
+  toast('已导出备份文件');
+}
+
+function importData(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data.todos || !data.notes || !data.projects) throw new Error('格式不正确');
+      state = {
+        todos: data.todos || [],
+        notes: data.notes || [],
+        projects: data.projects || [],
+        exportReminderDismissed: data.exportReminderDismissed || false
+      };
+      ensureProjectFields();
+      saveState();
+      autoMoveOverdue();
+      render();
+      toast('导入成功');
+    } catch(err) {
+      toast('导入失败：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearSamples() {
+  var count = state.todos.filter(function(t) { return t.isSample; }).length
+            + state.notes.filter(function(n) { return n.isSample; }).length
+            + state.projects.filter(function(p) { return p.isSample; }).length;
+  if (count === 0) { toast('没有示例数据了'); return; }
+  state.todos = state.todos.filter(function(t) { return !t.isSample; });
+  state.notes = state.notes.filter(function(n) { return !n.isSample; });
+  state.projects = state.projects.filter(function(p) { return !p.isSample; });
+  saveState();
+  render();
+  toast('已清空 ' + count + ' 条示例');
+}
+
+function hasSamples() {
+  return state.todos.some(function(t) { return t.isSample; })
+      || state.notes.some(function(n) { return n.isSample; })
+      || state.projects.some(function(p) { return p.isSample; });
+}
+
+// ============ Rendering ============
+function render() {
+  renderAlertBar();
+  renderTodayView();
+  renderNotesView();
+  renderProjectsView();
+  renderReviewView();
+  updateTodoProjectOptions();
+  updateExportReminder();
+  updateClearSamplesVisibility();
+  updateNavBadges();
+}
+
+function renderAlertBar() {
+  var today = todayStr();
+  var postponed = state.todos.filter(function(t) { return !t.done && (t.postponedCount || 0) > 0; });
+  var blocked = state.projects.filter(function(p) { return p.blocker; });
+  var bar = document.getElementById('alertBar');
+  var html = '';
+
+  if (postponed.length === 0 && blocked.length === 0) {
+    bar.className = 'alert-bar no-alerts';
+    html = '<div class="alert-title">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>'
+      + '今天没有需要特别关注的事项</div>';
+  } else {
+    bar.className = 'alert-bar has-alerts';
+    html = '<div class="alert-title">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>'
+      + '今日要处理的 (' + (postponed.length + blocked.length) + '项)</div><div class="alert-items">';
+    postponed.forEach(function(t) {
+      html += '<div class="alert-item"><span class="dot red"></span><strong>' + escapeHtml(t.title) + '</strong><span class="alert-meta">已顺延' + t.postponedCount + '次</span></div>';
+    });
+    blocked.forEach(function(p) {
+      html += '<div class="alert-item"><span class="dot orange"></span><strong>' + escapeHtml(p.name) + '</strong><span class="alert-meta">卡点：' + escapeHtml(p.blocker) + '</span></div>';
+    });
+    html += '</div>';
+  }
+  bar.innerHTML = html;
+}
+
+function renderTodayView() {
+  var today = todayStr();
+  var all = state.todos.slice();
+  var overdue = all.filter(function(t) { return !t.done && t.deadline < today; });
+  var todays = all.filter(function(t) { return !t.done && t.deadline === today; });
+  var futures = all.filter(function(t) { return !t.done && t.deadline > today; });
+  var completed = all.filter(function(t) { return t.done; })
+    .sort(function(a, b) { return new Date(b.completedAt || 0) - new Date(a.completedAt || 0); })
+    .slice(0, 15);
+
+  todays.sort(function(a, b) { return (PRIORITY_ORDER[a.priority] || 2) - (PRIORITY_ORDER[b.priority] || 2); });
+  overdue.sort(function(a, b) { return (PRIORITY_ORDER[a.priority] || 2) - (PRIORITY_ORDER[b.priority] || 2); });
+
+  var futureGroups = {};
+  futures.sort(function(a, b) { return a.deadline < b.deadline ? -1 : 1; })
+    .forEach(function(t) {
+      if (!futureGroups[t.deadline]) futureGroups[t.deadline] = [];
+      futureGroups[t.deadline].push(t);
+    });
+
+  var html = '';
+
+  if (overdue.length > 0) {
+    html += '<div class="section"><h3 class="section-title danger">逾期未完成 <span class="count">' + overdue.length + '</span></h3>';
+    overdue.forEach(function(t) { html += renderTodoItem(t); });
+    html += '</div>';
+  }
+
+  html += '<div class="section"><h3 class="section-title">今日待办 <span class="count">' + todays.length + '</span></h3>';
+  if (todays.length > 0) {
+    todays.forEach(function(t) { html += renderTodoItem(t); });
+  } else {
+    html += '<div class="empty-state">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>'
+      + '<div>今天没有待办，点上方添加一个吧</div></div>';
+  }
+  html += '</div>';
+
+  if (Object.keys(futureGroups).length > 0) {
+    html += '<div class="section"><h3 class="section-title">未来任务 <span class="count">' + futures.length + '</span></h3>';
+    Object.keys(futureGroups).sort().forEach(function(date) {
+      html += '<div class="date-group"><div class="date-label">' + formatDateFull(date) + '</div>';
+      futureGroups[date].forEach(function(t) { html += renderTodoItem(t); });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (completed.length > 0) {
+    html += '<div class="section"><h3 class="section-title completed">已完成 <span class="count">' + completed.length + '</span></h3>';
+    completed.forEach(function(t) { html += renderTodoItem(t); });
+    html += '</div>';
+  }
+
+  document.getElementById('todoList').innerHTML = html;
+}
+
+function renderTodoItem(t) {
+  var p = PRIORITIES[t.priority] || PRIORITIES.normal;
+  var today = todayStr();
+  var isOverdue = !t.done && t.deadline < today;
+  var project = t.projectId ? state.projects.find(function(x) { return x.id === t.projectId; }) : null;
+  var overdueDays = isOverdue ? Math.abs(daysFromToday(t.deadline)) : 0;
+
+  var html = '<div class="todo-item' + (t.done ? ' done' : '') + (isOverdue ? ' overdue' : '') + '">'
+    + '<label class="todo-check"><input type="checkbox" ' + (t.done ? 'checked' : '') + ' data-action="toggle-todo" data-id="' + t.id + '"><span class="checkmark"></span></label>'
+    + '<div class="todo-content">'
+    + '<div class="todo-title">' + escapeHtml(t.title) + '</div>'
+    + '<div class="todo-meta">'
+    + '<span class="tag priority ' + t.priority + '">' + p.label + '</span>';
+  if (project) html += '<span class="tag project">' + escapeHtml(project.name) + '</span>';
+  html += '<span class="tag deadline' + (isOverdue ? ' danger' : '') + '">' + formatDateDisplay(t.deadline) + (isOverdue ? ' · 逾期' + overdueDays + '天' : '') + '</span>';
+  if ((t.postponedCount || 0) > 0) html += '<span class="tag postpone">已顺延' + t.postponedCount + '次</span>';
+  html += '</div></div><div class="todo-actions">';
+  if (isOverdue) html += '<button class="btn-sm btn-postpone" data-action="postpone-todo" data-id="' + t.id + '">顺延</button>';
+  html += '<button class="btn-sm btn-edit" data-action="edit-todo" data-id="' + t.id + '">编辑</button>';
+  html += '<button class="btn-sm btn-delete" data-action="delete-todo" data-id="' + t.id + '">删除</button>'
+    + '</div></div>';
+  return html;
+}
+
+function renderNotesView() {
+  // Tag filters
+  var allTags = {};
+  state.notes.forEach(function(n) {
+    (n.tags || []).forEach(function(tag) { allTags[tag] = (allTags[tag] || 0) + 1; });
+  });
+  var tagKeys = Object.keys(allTags).sort();
+  var filterHtml = '<button class="tag-chip' + (!noteTagFilter ? ' active' : '') + '" data-action="filter-note" data-tag="">全部 (' + state.notes.length + ')</button>';
+  tagKeys.forEach(function(tag) {
+    filterHtml += '<button class="tag-chip' + (noteTagFilter === tag ? ' active' : '') + '" data-action="filter-note" data-tag="' + escapeHtml(tag) + '">' + escapeHtml(tag) + ' (' + allTags[tag] + ')</button>';
+  });
+  document.getElementById('noteTagFilters').innerHTML = filterHtml;
+
+  // Notes list
+  var notes = noteTagFilter ? state.notes.filter(function(n) { return (n.tags || []).indexOf(noteTagFilter) >= 0; }) : state.notes;
+  notes = notes.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+
+  var html = '';
+  if (notes.length === 0) {
+    html = '<div class="empty-state">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>'
+      + '<div>' + (noteTagFilter ? '该标签下没有笔记' : '还没有笔记，记一条灵感吧') + '</div></div>';
+  } else {
+    notes.forEach(function(n) {
+      var tagsHtml = (n.tags || []).map(function(tag) {
+        return '<span class="note-tag" data-action="filter-note" data-tag="' + escapeHtml(tag) + '">' + escapeHtml(tag) + '</span>';
+      }).join('');
+      html += '<div class="note-card">'
+        + '<div class="note-content">' + escapeHtml(n.content) + '</div>'
+        + '<div class="note-meta">'
+        + '<div class="note-tags">' + tagsHtml + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span class="note-time">' + timeAgo(n.createdAt) + '</span>'
+        + '<button class="note-delete" data-action="delete-note" data-id="' + n.id + '">删除</button>'
+        + '</div></div></div>';
+    });
+  }
+  document.getElementById('notesList').innerHTML = html;
+}
+
+function renderProjectsView() {
+  // Project overview bar
+  var ovwHtml = '';
+  if (state.projects.length > 0) {
+    ovwHtml += '<span class="project-overview-label">项目概览</span>';
+    state.projects.forEach(function(p) {
+      var linked = state.todos.filter(function(t) { return t.projectId === p.id; });
+      var doneCount = linked.filter(function(t) { return t.done; }).length;
+      var total = linked.length;
+      var pct = total > 0 ? Math.round(doneCount / total * 100) : 0;
+      var dotClass = p.blocker ? 'blocked' : (total > 0 && doneCount === total ? 'done' : 'active');
+      ovwHtml += '<button class="project-overview-tag" data-action="scroll-project" data-id="' + p.id + '">'
+        + '<span class="ovw-dot ' + dotClass + '"></span>'
+        + escapeHtml(p.name)
+        + (total > 0 ? '<span class="ovw-pct">' + pct + '%</span>' : '')
+        + '</button>';
+    });
+  }
+  document.getElementById('projectOverview').innerHTML = ovwHtml;
+
+  // Project cards
+  var html = '';
+  if (state.projects.length === 0) {
+    html = '<div class="empty-state">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+      + '<div>还没有项目，新建一个开始跟进吧</div></div>';
+  } else {
+    state.projects.forEach(function(p) { html += renderProjectCard(p); });
+  }
+  document.getElementById('projectsList').innerHTML = html;
+}
+
+function renderProjectCard(p) {
+  var linkedTodos = state.todos.filter(function(t) { return t.projectId === p.id; });
+  var doneCount = linkedTodos.filter(function(t) { return t.done; }).length;
+  var totalCount = linkedTodos.length;
+  var progress = totalCount > 0 ? Math.round(doneCount / totalCount * 100) : 0;
+  var hasBlocker = !!p.blocker;
+
+  var html = '<div class="project-card' + (hasBlocker ? ' has-blocker' : '') + '" id="proj-card-' + p.id + '">'
+    + '<div class="project-header">'
+    + '<div class="project-name">' + escapeHtml(p.name) + '</div>'
+    + '<div class="project-actions">'
+    + '<button class="btn-sm btn-delete" data-action="edit-project" data-id="' + p.id + '">编辑</button>'
+    + '<button class="btn-sm btn-delete" data-action="delete-project" data-id="' + p.id + '">删除</button>'
+    + '</div></div>'
+
+    // 构思 / 规划 区块（点击即编辑）
+    + '<div class="field-block" data-action="edit-project" data-id="' + p.id + '" title="点击编辑项目构思">'
+    + '<div class="field-label">项目构思</div>'
+    + '<div class="field-text' + (p.concept ? '' : ' empty') + '">' + (p.concept ? escapeHtml(p.concept) : '点击填写：为什么做、目标、预期成果…') + '</div>'
+    + '</div>'
+    + '<div class="field-block" data-action="edit-project" data-id="' + p.id + '" title="点击编辑整体规划">'
+    + '<div class="field-label">整体规划</div>'
+    + '<div class="field-text' + (p.plan ? '' : ' empty') + '">' + (p.plan ? escapeHtml(p.plan) : '点击填写：分阶段计划、里程碑、时间安排…') + '</div>'
+    + '</div>'
+
+    + '<div class="project-field"><span class="project-field-label">当前：</span><span class="project-field-value">' + escapeHtml(p.currentStep || '—') + '</span></div>'
+    + '<div class="project-field"><span class="project-field-label">下一步：</span><span class="project-field-value">' + escapeHtml(p.nextStep || '—') + '</span></div>';
+  if (hasBlocker) {
+    html += '<div class="project-blocker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>' + escapeHtml(p.blocker) + '</div>';
+  }
+  if (totalCount > 0) {
+    html += '<div class="project-progress">'
+      + '<div class="progress-header"><span class="progress-label">关联待办进度</span><span class="progress-count">' + doneCount + '/' + totalCount + ' 完成 · ' + progress + '%</span></div>'
+      + '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>'
+      + '<div class="project-todos">';
+    linkedTodos.forEach(function(t) {
+      html += '<div class="project-todo' + (t.done ? ' done' : '') + '"><span class="mini-check"></span>' + escapeHtml(t.title) + '</div>';
+    });
+    html += '</div></div>';
+  } else {
+    html += '<div class="project-progress"><div class="progress-header"><span class="progress-label">关联待办</span><span class="progress-count" style="color:var(--text-muted)">暂无关联待办，可点击下方「新建待办」直接创建</span></div></div>';
+  }
+
+  // 快捷新建待办（自动关联本项目）
+  html += '<button class="quick-add-toggle" data-action="quick-add-todo" data-id="' + p.id + '">'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>'
+    + '在此项目下新建待办'
+    + '</button>'
+    + '<div class="quick-add-body" id="quickAdd-' + p.id + '">'
+    + '<div class="form-row"><div class="form-group flex-1">'
+    + '<textarea class="form-textarea" id="qa-title-' + p.id + '" rows="2" placeholder="要做什么？（可换行）" style="min-height:44px"></textarea>'
+    + '</div></div>'
+    + '<div class="form-row">'
+    + '<div class="form-group" style="flex:1;min-width:110px"><select class="form-select" id="qa-priority-' + p.id + '">'
+    + '<option value="urgent">紧急</option><option value="important">重要</option><option value="normal" selected>一般</option><option value="low">不急</option>'
+    + '</select></div>'
+    + '<div class="form-group" style="flex:1;min-width:130px"><input type="date" class="form-input" id="qa-deadline-' + p.id + '"></div>'
+    + '</div>'
+    + '<div class="form-actions" style="justify-content:flex-end">'
+    + '<button class="btn-secondary" style="padding:6px 14px;font-size:13px" data-action="quick-add-cancel" data-id="' + p.id + '">取消</button>'
+    + '<button class="btn-primary" style="padding:6px 14px;font-size:13px" data-action="quick-add-save" data-id="' + p.id + '">添加</button>'
+    + '</div>'
+    + '</div>';
+
+  html += '</div>';
+  return html;
+}
+
+function renderReviewView() {
+  var weekAgo = Date.now() - 7 * 86400000;
+  var completedThisWeek = state.todos.filter(function(t) {
+    return t.done && t.completedAt && new Date(t.completedAt).getTime() >= weekAgo;
+  });
+
+  // 7-day bar chart data
+  var dayLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  var dayData = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    var next = new Date(d);
+    next.setDate(d.getDate() + 1);
+    var count = state.todos.filter(function(t) {
+      if (!t.done || !t.completedAt) return false;
+      var ct = new Date(t.completedAt).getTime();
+      return ct >= d.getTime() && ct < next.getTime();
+    }).length;
+    dayData.push({ label: dayLabels[d.getDay() === 0 ? 6 : d.getDay() - 1], count: count });
+  }
+
+  // Priority distribution
+  var priorityData = [];
+  ['urgent', 'important', 'normal', 'low'].forEach(function(key) {
+    var count = completedThisWeek.filter(function(t) { return t.priority === key; }).length;
+    if (count > 0) priorityData.push({ label: PRIORITIES[key].label, value: count, color: PRIORITIES[key].barColor });
+  });
+
+  // Project energy
+  var projectData = [];
+  state.projects.forEach(function(p) {
+    var count = completedThisWeek.filter(function(t) { return t.projectId === p.id; }).length;
+    projectData.push({ name: p.name, count: count });
+  });
+  var unlinked = completedThisWeek.filter(function(t) { return !t.projectId; }).length;
+  if (unlinked > 0) projectData.push({ name: '未关联项目', count: unlinked });
+  projectData.sort(function(a, b) { return b.count - a.count; });
+  var maxProjectCount = Math.max.apply(null, projectData.map(function(d) { return d.count; }).concat([1]));
+
+  // Blockers
+  var blockers = state.projects.filter(function(p) { return p.blocker; });
+
+  // Postponement stats
+  var postponedTasks = state.todos.filter(function(t) { return !t.done && (t.postponedCount || 0) > 0; });
+  var totalPostpones = state.todos.reduce(function(s, t) { return s + (t.postponedCount || 0); }, 0);
+
+  var html = '<div class="section"><h3 class="section-title">本周复盘</h3></div>';
+
+  // Stats row
+  html += '<div class="review-grid">';
+  // Completion count
+  html += '<div class="review-card"><div class="review-card-title">本周完成</div>'
+    + '<div class="stat-big">' + completedThisWeek.length + '</div>'
+    + '<div class="stat-sub">件任务已完成</div></div>';
+
+  // 7-day bar chart
+  html += '<div class="review-card review-full-width"><div class="review-card-title">近 7 天完成趋势</div>';
+  html += renderWeekBars(dayData);
+  html += '</div>';
+
+  // Priority donut
+  html += '<div class="review-card"><div class="review-card-title">优先级分布</div>';
+  if (priorityData.length > 0) {
+    html += '<div class="chart-container">' + renderDonut(priorityData, completedThisWeek.length) + '<div class="donut-legend">';
+    priorityData.forEach(function(d) {
+      html += '<div class="legend-item"><span class="legend-dot" style="background:' + d.color + '"></span>' + d.label + ' (' + d.value + ')</div>';
+    });
+    html += '</div></div>';
+  } else {
+    html += '<div class="empty-state" style="padding:20px">本周暂无完成记录</div>';
+  }
+  html += '</div>';
+
+  // Project energy
+  html += '<div class="review-card"><div class="review-card-title">精力分布（按项目）</div>';
+  if (projectData.some(function(d) { return d.count > 0; })) {
+    projectData.forEach(function(d) {
+      var width = Math.round(d.count / maxProjectCount * 100);
+      html += '<div class="energy-bar-row"><div class="energy-bar-label" title="' + escapeHtml(d.name) + '">' + escapeHtml(d.name) + '</div>'
+        + '<div class="energy-bar-track"><div class="energy-bar-fill" style="width:' + width + '%;background:' + (d.name === '未关联项目' ? '#94a3b8' : 'linear-gradient(90deg,#0d9488,#14b8a6)') + '">' + (d.count > 0 ? d.count : '') + '</div></div></div>';
+    });
+  } else {
+    html += '<div class="empty-state" style="padding:20px">本周暂无项目完成记录</div>';
+  }
+  html += '</div>';
+
+  // Blockers
+  html += '<div class="review-card"><div class="review-card-title">卡点汇总</div>';
+  if (blockers.length > 0) {
+    blockers.forEach(function(p) {
+      html += '<div class="blocker-list-item"><strong>' + escapeHtml(p.name) + '：</strong>' + escapeHtml(p.blocker) + '</div>';
+    });
+  } else {
+    html += '<div class="empty-state" style="padding:20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>暂无卡点，进展顺利</div>';
+  }
+  html += '</div>';
+
+  // Postponement stats
+  html += '<div class="review-card"><div class="review-card-title">顺延情况</div>'
+    + '<div class="stat-big" style="color:var(--warning)">' + totalPostpones + '</div>'
+    + '<div class="stat-sub">次顺延，涉及 ' + postponedTasks.length + ' 个任务</div></div>';
+
+  html += '</div>';
+  document.getElementById('reviewContent').innerHTML = html;
+}
+
+function renderDonut(data, total) {
+  var radius = 52;
+  var circumference = 2 * Math.PI * radius;
+  var offset = 0;
+  var segments = '';
+  data.forEach(function(d) {
+    var portion = d.value / total;
+    var dash = portion * circumference;
+    segments += '<circle cx="70" cy="70" r="' + radius + '" fill="none" stroke="' + d.color + '" stroke-width="20" stroke-dasharray="' + dash + ' ' + (circumference - dash) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 70 70)"/>';
+    offset += dash;
+  });
+  return '<svg viewBox="0 0 140 140" width="140" height="140">' + segments
+    + '<text x="70" y="66" text-anchor="middle" font-size="26" font-weight="800" fill="#1e293b">' + total + '</text>'
+    + '<text x="70" y="84" text-anchor="middle" font-size="11" fill="#94a3b8">已完成</text></svg>';
+}
+
+function renderWeekBars(data) {
+  var maxCount = Math.max.apply(null, data.map(function(d) { return d.count; }).concat([1]));
+  var barWidth = 48;
+  var gap = 20;
+  var chartHeight = 100;
+  var startX = 16;
+  var totalWidth = data.length * (barWidth + gap) - gap + 32;
+  var bars = '';
+  data.forEach(function(d, i) {
+    var barHeight = (d.count / maxCount) * chartHeight;
+    var x = startX + i * (barWidth + gap);
+    var y = chartHeight - barHeight + 10;
+    bars += '<rect x="' + x + '" y="' + y + '" width="' + barWidth + '" height="' + barHeight + '" rx="6" fill="' + (d.count > 0 ? '#0d9488' : '#e2e8f0') + '"/>';
+    bars += '<text x="' + (x + barWidth / 2) + '" y="' + (chartHeight + 28) + '" text-anchor="middle" font-size="12" fill="#64748b">' + d.label + '</text>';
+    if (d.count > 0) {
+      bars += '<text x="' + (x + barWidth / 2) + '" y="' + (y - 6) + '" text-anchor="middle" font-size="12" fill="#0d9488" font-weight="700">' + d.count + '</text>';
+    }
+  });
+  return '<svg viewBox="0 0 ' + totalWidth + ' ' + (chartHeight + 40) + '" style="width:100%;max-width:500px;height:auto">' + bars + '</svg>';
+}
+
+// ============ UI Helpers ============
+function updateTodoProjectOptions() {
+  var sel = document.getElementById('todoProject');
+  var current = sel.value;
+  sel.innerHTML = '<option value="">无</option>';
+  state.projects.forEach(function(p) {
+    sel.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>';
+  });
+  sel.value = current;
+}
+
+function updateExportReminder() {
+  var total = state.todos.length + state.notes.length + state.projects.length;
+  var el = document.getElementById('exportReminder');
+  if (total >= 20 && !state.exportReminderDismissed) {
+    el.classList.add('show');
+    document.getElementById('reminderCount').textContent = total;
+  } else {
+    el.classList.remove('show');
+  }
+  if (total < 20 && state.exportReminderDismissed) {
+    state.exportReminderDismissed = false;
+    saveState();
+  }
+}
+
+function updateClearSamplesVisibility() {
+  var show = hasSamples();
+  document.getElementById('btnClearSamples').style.display = show ? '' : 'none';
+  document.getElementById('btnClearSamplesTop').style.display = show ? '' : 'none';
+}
+
+function updateNavBadges() {
+  var today = todayStr();
+  var alertCount = state.todos.filter(function(t) { return !t.done && (t.postponedCount || 0) > 0; }).length
+    + state.projects.filter(function(p) { return p.blocker; }).length;
+  var navBadge = document.getElementById('navBadgeToday');
+  var mobileBadge = document.getElementById('mobileBadgeToday');
+  if (alertCount > 0) {
+    navBadge.style.display = '';
+    navBadge.textContent = alertCount;
+    mobileBadge.style.display = '';
+    mobileBadge.textContent = alertCount;
+  } else {
+    navBadge.style.display = 'none';
+    mobileBadge.style.display = 'none';
+  }
+}
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  var el = document.getElementById('view-' + view);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.classList.toggle('active', n.dataset.nav === view);
+  });
+  document.querySelectorAll('.mobile-nav-item').forEach(function(n) {
+    n.classList.toggle('active', n.dataset.nav === view);
+  });
+}
+
+// ============ Event Binding ============
+function bindEvents() {
+  // Navigation
+  document.addEventListener('click', function(e) {
+    // Nav items
+    var navEl = e.target.closest('[data-nav]');
+    if (navEl) { switchView(navEl.dataset.nav); return; }
+
+    // Action items
+    var actionEl = e.target.closest('[data-action]');
+    if (!actionEl) return;
+    var action = actionEl.dataset.action;
+    var id = actionEl.dataset.id;
+    var tag = actionEl.dataset.tag;
+
+    switch(action) {
+      case 'toggle-todo': toggleTodo(id); break;
+      case 'postpone-todo': postponeTodo(id); break;
+      case 'edit-todo': openEditTodo(id); break;
+      case 'delete-todo': deleteTodo(id); break;
+      case 'delete-note': deleteNote(id); break;
+      case 'filter-note': noteTagFilter = tag || null; renderNotesView(); break;
+      case 'edit-project': openEditProject(id); break;
+      case 'delete-project': deleteProject(id); break;
+      case 'quick-add-todo': toggleQuickAdd(id); break;
+      case 'quick-add-cancel': {
+        var qaBody = document.getElementById('quickAdd-' + id);
+        if (qaBody) qaBody.classList.remove('show');
+        break;
+      }
+      case 'quick-add-save': quickAddTodo(id); break;
+      case 'scroll-project': {
+        var card = document.getElementById('proj-card-' + id);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.style.transition = 'box-shadow .3s ease';
+          card.style.boxShadow = '0 0 0 2px var(--primary), 0 4px 12px rgba(13,148,136,.2)';
+          setTimeout(function() { card.style.boxShadow = ''; }, 1500);
+        }
+        break;
+      }
+      case 'export': exportData(); break;
+      case 'import-trigger': document.getElementById('importFile').click(); break;
+      case 'clear-samples': clearSamples(); break;
+      case 'force-sync': forceSync(); break;
+      case 'sync-link': generateSyncLink(); break;
+    }
+  });
+
+  // Toggle forms
+  document.getElementById('toggleTodoForm').addEventListener('click', function() {
+    document.getElementById('todoFormBody').classList.toggle('show');
+    document.getElementById('todoDeadline').value = todayStr();
+    if (document.getElementById('todoFormBody').classList.contains('show')) {
+      document.getElementById('todoTitle').focus();
+    }
+  });
+  document.getElementById('btnCancelTodo').addEventListener('click', function() {
+    document.getElementById('todoFormBody').classList.remove('show');
+  });
+  document.getElementById('btnAddTodo').addEventListener('click', addTodo);
+
+  document.getElementById('toggleNoteForm').addEventListener('click', function() {
+    document.getElementById('noteFormBody').classList.toggle('show');
+    if (document.getElementById('noteFormBody').classList.contains('show')) {
+      document.getElementById('noteContent').focus();
+    }
+  });
+  document.getElementById('btnCancelNote').addEventListener('click', function() {
+    document.getElementById('noteFormBody').classList.remove('show');
+  });
+  document.getElementById('btnAddNote').addEventListener('click', addNote);
+
+  document.getElementById('toggleProjectForm').addEventListener('click', function() {
+    document.getElementById('projectFormBody').classList.toggle('show');
+    if (document.getElementById('projectFormBody').classList.contains('show')) {
+      document.getElementById('projectName').focus();
+    }
+  });
+  document.getElementById('btnCancelProject').addEventListener('click', function() {
+    document.getElementById('projectFormBody').classList.remove('show');
+  });
+  document.getElementById('btnAddProject').addEventListener('click', addProject);
+
+  // Project modal
+  document.getElementById('btnCloseProjectModal').addEventListener('click', function() {
+    document.getElementById('projectModal').classList.remove('show');
+    editingProjectId = null;
+  });
+  document.getElementById('btnSaveProjectModal').addEventListener('click', saveProjectModal);
+  document.getElementById('projectModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('show');
+      editingProjectId = null;
+    }
+  });
+
+  // Todo edit modal
+  document.getElementById('todoEditCancel').addEventListener('click', closeTodoEdit);
+  document.getElementById('todoEditSave').addEventListener('click', saveTodoEdit);
+  document.getElementById('todoEditModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTodoEdit();
+  });
+
+  // Import file
+  document.getElementById('importFile').addEventListener('change', function(e) {
+    if (e.target.files[0]) {
+      importData(e.target.files[0]);
+      e.target.value = '';
+    }
+  });
+
+  // Export reminder
+  document.getElementById('btnReminderExport').addEventListener('click', exportData);
+  document.getElementById('btnReminderDismiss').addEventListener('click', function() {
+    state.exportReminderDismissed = true;
+    saveState();
+    document.getElementById('exportReminder').classList.remove('show');
+  });
+
+  // Escape closes modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('projectModal').classList.remove('show');
+      editingProjectId = null;
+      closeTodoEdit();
+    }
+  });
+}
+
+// ============ Init ============
+function init() {
+  loadState();
+  autoMoveOverdue();
+  bindEvents();
+  document.getElementById('todoDeadline').value = todayStr();
+  render();
+
+  // 检测同步链接 hash
+  checkSyncHash();
+
+  // 初始化 GitHub Gist 云同步 — 所有设备共用同一个 Gist
+  if (initGitHubSync()) {
+    _syncStatus = 'syncing';
+    updateSyncIndicator();
+    // 先拉云端数据
+    fetchSync(GH_API + '/gists/' + GH_GIST_ID, {
+      headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' }
+    }).then(function(r) { return r.json(); })
+      .then(function(gist) {
+        var file = gist.files && gist.files['dashboard-state.json'];
+        if (file && file.content) {
+          try {
+            var cloud = JSON.parse(file.content);
+            var cloudTs = cloud._ts || 0;
+            if (cloudTs > _lastCloudTimestamp && cloud.todos) {
+              state = {
+                todos: cloud.todos || [],
+                notes: cloud.notes || [],
+                projects: cloud.projects || [],
+                exportReminderDismissed: cloud.exportReminderDismissed || false
+              };
+              _lastCloudTimestamp = cloudTs;
+              saveToLocalStorage();
+              autoMoveOverdue();
+              render();
+              updateTodoProjectOptions();
+            }
+          } catch(e) {}
+        }
+        // 把本地数据推上去（如果云端是空的或本地更新）
+        pushToCloud();
+        startPolling();
+      }).catch(function() {
+        _syncStatus = 'offline'; updateSyncIndicator();
+      });
+  }
+}
+
+init();
+})();
+</script>
+</body>
+</html>

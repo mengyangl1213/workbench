@@ -860,6 +860,10 @@ a { color: var(--primary); text-decoration: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         拉取云端
       </button>
+      <button class="toolbar-btn" id="btnConnectCloud" data-action="connect-cloud" title="输入或更新 GitHub Token，并立即从云端拉取数据">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        连接云端
+      </button>
       <button class="toolbar-btn" id="btnSyncLink" data-action="sync-link" style="display:none" title="生成同步链接，分享给其他设备">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
         链接同步
@@ -1165,6 +1169,22 @@ var _pollTimer = null;
 var _retryCount = 0;
 var _maxRetries = 3;
 var _retryTimer = null;
+
+// 手动连接云端：输入/更新 Token，并立即强制拉取（手机端 prompt 被拦截时的兜底入口）
+function connectCloud() {
+  var t = window.prompt('请输入 GitHub Personal Access Token（勾选 gist 权限）：\n\n仅保存在本设备浏览器，不会上传到任何服务器。');
+  if (!t) return;
+  t = t.trim();
+  if (!t) return;
+  localStorage.setItem('gh_sync_token', t);
+  GH_TOKEN = t;
+  GH_ENABLED = true;
+  _retryCount = 0;
+  _syncPending = false;
+  updateSyncIndicator();
+  startPolling();
+  pullFromCloud(true);
+}
 
 function initGitHubSync() {
   if (!GH_TOKEN || GH_TOKEN.indexOf('ghp_') !== 0) {
@@ -2414,6 +2434,7 @@ function bindEvents() {
       case 'clear-samples': clearSamples(); break;
       case 'force-sync': forceSync(); break;
       case 'pull-cloud': pullFromCloud(true); break;
+      case 'connect-cloud': connectCloud(); break;
       case 'sync-link': generateSyncLink(); break;
     }
   });

@@ -856,6 +856,10 @@ a { color: var(--primary); text-decoration: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
         同步
       </button>
+      <button class="toolbar-btn" id="btnPullCloud" data-action="pull-cloud" style="display:none" title="从云端强制拉取最新数据，覆盖本设备">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        拉取云端
+      </button>
       <button class="toolbar-btn" id="btnSyncLink" data-action="sync-link" style="display:none" title="生成同步链接，分享给其他设备">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
         链接同步
@@ -1243,8 +1247,10 @@ function scheduleRetry() {
   _retryTimer = setTimeout(pushToCloud, d);
 }
 
-function pullFromCloud() {
+function pullFromCloud(force) {
   if (!GH_ENABLED) return;
+  // force=true 时忽略本地时间戳，无条件用云端数据覆盖本设备
+  var baseline = force ? 0 : _lastCloudTimestamp;
   fetchSync(GH_API + '/gists/' + GH_GIST_ID, {
     headers: {
       'Authorization': 'token ' + GH_TOKEN,
@@ -1257,7 +1263,12 @@ function pullFromCloud() {
       try {
         var cloud = JSON.parse(file.content);
         var cloudTs = cloud._ts || 0;
-        if (cloudTs > _lastCloudTimestamp && cloud.todos) {
+        if ((force || cloudTs > baseline) && cloud.todos) {
+          if (force && window.confirm('确定用云端数据覆盖本设备吗？本设备未同步的改动会丢失。')) {
+            // continue
+          } else if (force) {
+            return;
+          }
           state = {
             todos: cloud.todos || [],
             notes: cloud.notes || [],
@@ -1272,6 +1283,7 @@ function pullFromCloud() {
           _syncStatus = 'online';
           _retryCount = 0;
           updateSyncIndicator();
+          if (force) toast('已从云端拉取最新数据');
           console.log('[Sync] 已从云端更新');
         } else if (!_syncPending) {
           _syncStatus = 'online';
@@ -1390,16 +1402,19 @@ function updateSyncIndicator() {
   if (!el) return;
   var btn = document.getElementById('btnForceSync');
   var btnLink = document.getElementById('btnSyncLink');
+  var btnPull = document.getElementById('btnPullCloud');
   var detail = el.querySelector('.sync-detail');
   if (!GH_ENABLED) {
     el.style.display = 'none';
     if (btn) btn.style.display = 'none';
     if (btnLink) btnLink.style.display = 'none';
+    if (btnPull) btnPull.style.display = 'none';
     return;
   }
   el.style.display = 'inline-flex';
   if (btn) btn.style.display = '';
   if (btnLink) btnLink.style.display = '';
+  if (btnPull) btnPull.style.display = '';
   var dot = el.querySelector('.sync-dot');
   var label = el.querySelector('.sync-label');
   if (_syncStatus === 'online') {
@@ -2384,6 +2399,7 @@ function bindEvents() {
       case 'import-trigger': document.getElementById('importFile').click(); break;
       case 'clear-samples': clearSamples(); break;
       case 'force-sync': forceSync(); break;
+      case 'pull-cloud': pullFromCloud(true); break;
       case 'sync-link': generateSyncLink(); break;
     }
   });

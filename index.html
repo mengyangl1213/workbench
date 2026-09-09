@@ -1249,8 +1249,8 @@ function scheduleRetry() {
 
 function pullFromCloud(force) {
   if (!GH_ENABLED) return;
-  // force=true 时忽略本地时间戳，无条件用云端数据覆盖本设备
-  var baseline = force ? 0 : _lastCloudTimestamp;
+  // force=true 或本地是全新示例数据时，忽略本地时间戳，无条件以云端为准
+  var baseline = (force || _isFreshSample) ? 0 : _lastCloudTimestamp;
   fetchSync(GH_API + '/gists/' + GH_GIST_ID, {
     headers: {
       'Authorization': 'token ' + GH_TOKEN,
@@ -1277,6 +1277,7 @@ function pullFromCloud(force) {
           };
           ensureProjectFields();
           _lastCloudTimestamp = cloudTs;
+          _isFreshSample = false;
           saveToLocalStorage();
           render();
           updateTodoProjectOptions();
@@ -1548,6 +1549,8 @@ function loadState() {
       ensureProjectFields();
     } else {
       state = getSampleData();
+      _isFreshSample = true;   // 标记为「本地只有示例数据」，云端数据必须优先
+      _lastCloudTimestamp = 0;
       saveToLocalStorage();
     }
   } catch(e) {
@@ -1555,6 +1558,9 @@ function loadState() {
     state = getSampleData();
   }
 }
+
+// 本地只有示例数据（新设备/新域名），云端拉取时应无条件覆盖
+var _isFreshSample = false;
 
 function saveState() {
   state._localTs = Date.now();
@@ -1871,6 +1877,14 @@ function clearSamples() {
             + state.notes.filter(function(n) { return n.isSample; }).length
             + state.projects.filter(function(p) { return p.isSample; }).length;
   if (count === 0) { toast('没有示例数据了'); return; }
+  // 二次确认：清空会同步到云端，属于危险操作
+  var realCount = state.todos.filter(function(t) { return !t.isSample; }).length
+                 + state.notes.filter(function(n) { return !n.isSample; }).length
+                 + state.projects.filter(function(p) { return !p.isSample; }).length;
+  var msg = realCount > 0
+    ? '将清空 ' + count + ' 条示例数据。\n\n你还有 ' + realCount + ' 条自己的数据，会保留。\n\n此操作会同步到云端，确定继续吗？'
+    : '警告：当前设备上只有示例数据，没有你自己的数据！\n\n清空后会同步到云端，可能覆盖其他设备上的真实数据。\n\n确定要继续吗？';
+  if (!window.confirm(msg)) return;
   state.todos = state.todos.filter(function(t) { return !t.isSample; });
   state.notes = state.notes.filter(function(n) { return !n.isSample; });
   state.projects = state.projects.filter(function(p) { return !p.isSample; });
